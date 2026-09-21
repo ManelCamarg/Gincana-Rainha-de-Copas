@@ -1,8 +1,12 @@
 // Main JavaScript File
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize loader
+    initLoader();
+    
     // Initialize all components
     initCountdown();
     initFloatingCards();
+    initParticles();
     initMascotCards();
     initTeamMembers();
     initLoreTimeline();
@@ -11,7 +15,19 @@ document.addEventListener('DOMContentLoaded', function() {
     initMobileMenu();
     initSmoothScroll();
     initAnimations();
+    initScrollProgress();
+    initMagneticButtons();
 });
+
+// Loader
+function initLoader() {
+    const loader = document.getElementById('loader');
+    
+    // Hide loader after animation
+    setTimeout(() => {
+        loader.classList.add('hidden');
+    }, 2500);
+}
 
 // Countdown Timer
 function initCountdown() {
@@ -61,6 +77,64 @@ function initFloatingCards() {
     }
 }
 
+// Particles System
+function initParticles() {
+    const container = document.getElementById('particles-container');
+    const colors = ['#DC143C', '#D4AF37', '#FFFFFF'];
+    
+    for (let i = 0; i < 50; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        
+        const size = Math.random() * 4 + 2;
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const duration = Math.random() * 20 + 10;
+        const delay = Math.random() * 10;
+        
+        particle.style.width = size + 'px';
+        particle.style.height = size + 'px';
+        particle.style.background = color;
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDuration = duration + 's';
+        particle.style.animationDelay = delay + 's';
+        particle.style.opacity = Math.random() * 0.5 + 0.2;
+        
+        container.appendChild(particle);
+    }
+}
+
+// Scroll Progress
+function initScrollProgress() {
+    const progressBar = document.getElementById('scroll-progress');
+    
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrollPercent = (scrollTop / docHeight) * 100;
+        
+        progressBar.style.width = scrollPercent + '%';
+    });
+}
+
+// Magnetic Buttons
+function initMagneticButtons() {
+    const magneticBtns = document.querySelectorAll('.magnetic-btn');
+    
+    magneticBtns.forEach(btn => {
+        btn.addEventListener('mousemove', (e) => {
+            const rect = btn.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            
+            btn.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
+        });
+        
+        btn.addEventListener('mouseleave', () => {
+            btn.style.transform = 'translate(0, 0)';
+        });
+    });
+}
+
 // Mascot Cards
 async function initMascotCards() {
     try {
@@ -70,19 +144,19 @@ async function initMascotCards() {
         
         data.materials.forEach((material, index) => {
             const card = document.createElement('div');
-            card.className = 'card-flip-container bg-[#0D0D0D] border border-[#DC143C]/30 rounded-xl p-6 cursor-pointer h-48';
+            card.className = 'card-flip-container glass border border-[#DC143C]/30 rounded-xl p-6 cursor-pointer h-48 card-modern';
             card.style.animationDelay = `${index * 0.1}s`;
             
             card.innerHTML = `
                 <div class="card-flip-inner h-full">
                     <div class="card-flip-front flex flex-col items-center justify-center h-full">
-                        <span class="text-4xl mb-3">${material.icon}</span>
-                        <h3 class="font-['Cinzel'] text-lg font-bold text-[#DC143C] text-center">${material.name}</h3>
-                        <p class="text-gray-400 text-sm text-center mt-2">${material.category}</p>
+                        <span class="text-4xl mb-3 animate-float">${material.icon}</span>
+                        <h3 class="font-['Cinzel'] text-lg font-bold text-[#960018] text-center">${material.name}</h3>
+                        <p class="text-gray-600 text-sm text-center mt-2">${material.category}</p>
                     </div>
-                    <div class="card-flip-back flex flex-col items-center justify-center h-full bg-[#1A1A1A] p-4">
-                        <p class="text-gray-300 text-sm text-center">${material.description}</p>
-                        <p class="text-[#D4AF37] text-xs text-center mt-2 italic">${material.name_en}</p>
+                    <div class="card-flip-back flex flex-col items-center justify-center h-full glass p-4">
+                        <p class="text-gray-700 text-sm text-center">${material.description}</p>
+                        <p class="text-[#B8860B] text-xs text-center mt-2 italic">${material.name_en}</p>
                     </div>
                 </div>
             `;
@@ -103,22 +177,69 @@ async function initTeamMembers() {
         
         data.members.forEach((member, index) => {
             const memberCard = document.createElement('div');
-            memberCard.className = 'bg-[#1A1A1A] border border-[#D4AF37]/30 rounded-xl p-6 text-center card-hover';
+            memberCard.className = 'glass border border-[#D4AF37]/30 rounded-xl p-6 text-center card-modern cursor-pointer';
             memberCard.style.animationDelay = `${index * 0.1}s`;
             
             memberCard.innerHTML = `
-                <div class="text-5xl mb-4">${member.icon}</div>
-                <h3 class="font-['Cinzel'] text-xl font-bold text-white mb-2">${member.name}</h3>
-                <p class="text-[#D4AF37] font-semibold mb-1">${member.role}</p>
-                <p class="text-gray-400 text-sm mb-3">${member.grade}</p>
-                <p class="text-gray-300 text-sm italic">"${member.quote}"</p>
+                <div class="text-5xl mb-4 animate-float">${member.icon}</div>
+                <h3 class="font-['Cinzel'] text-xl font-bold text-[#960018] mb-2">${member.name}</h3>
+                <p class="text-[#B8860B] font-semibold mb-1">${member.role}</p>
+                <p class="text-gray-600 text-sm mb-3">${member.grade}</p>
+                <p class="text-gray-700 text-sm italic">"${member.quote}"</p>
             `;
+            
+            // Add click event for modal
+            memberCard.addEventListener('click', () => {
+                openTeamModal(member);
+            });
             
             container.appendChild(memberCard);
         });
+        
+        // Initialize team modal
+        initTeamModal();
     } catch (error) {
         console.error('Error loading team members:', error);
     }
+}
+
+// Team Modal
+function initTeamModal() {
+    const modal = document.getElementById('team-modal');
+    const modalContent = document.getElementById('team-modal-content');
+    const closeBtn = document.getElementById('close-team-modal');
+    
+    closeBtn.addEventListener('click', () => {
+        modalContent.classList.remove('modal-enter');
+        modalContent.classList.add('modal-exit');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }, 300);
+    });
+    
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeBtn.click();
+        }
+    });
+}
+
+function openTeamModal(member) {
+    const modal = document.getElementById('team-modal');
+    const modalContent = document.getElementById('team-modal-content');
+    
+    document.getElementById('modal-member-icon').textContent = member.icon;
+    document.getElementById('modal-member-name').textContent = member.name;
+    document.getElementById('modal-member-role').textContent = member.role;
+    document.getElementById('modal-member-grade').textContent = member.grade;
+    document.getElementById('modal-member-quote').textContent = member.quote;
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    modalContent.classList.add('modal-enter');
+    modalContent.classList.remove('modal-exit');
 }
 
 // Lore Timeline
@@ -130,19 +251,19 @@ async function initLoreTimeline() {
         
         data.story.forEach((chapter, index) => {
             const timelineItem = document.createElement('div');
-            timelineItem.className = 'timeline-item mb-8 animate-fade-in';
+            timelineItem.className = 'timeline-item mb-8 animate-fade-in-up';
             timelineItem.style.animationDelay = `${index * 0.2}s`;
             
             timelineItem.innerHTML = `
-                <div class="bg-[#0D0D0D] border border-[#DC143C]/30 rounded-xl p-6 ml-4 card-hover">
+                <div class="glass border border-[#DC143C]/30 rounded-xl p-6 ml-4 card-modern">
                     <div class="flex items-start justify-between mb-4">
                         <div>
-                            <span class="text-[#D4AF37] text-sm font-semibold">${chapter.chapter}</span>
-                            <h3 class="font-['Cinzel'] text-xl font-bold text-[#DC143C] mt-1">${chapter.title}</h3>
+                            <span class="text-[#B8860B] text-sm font-semibold">${chapter.chapter}</span>
+                            <h3 class="font-['Cinzel'] text-xl font-bold text-[#960018] mt-1">${chapter.title}</h3>
                         </div>
-                        <span class="text-3xl">${chapter.icon}</span>
+                        <span class="text-3xl animate-float">${chapter.icon}</span>
                     </div>
-                    <p class="text-gray-300 leading-relaxed">${chapter.description}</p>
+                    <p class="text-gray-700 leading-relaxed">${chapter.description}</p>
                     <p class="text-gray-500 text-sm italic mt-2">${chapter.title_en}</p>
                 </div>
             `;
@@ -165,11 +286,41 @@ async function initDashboard() {
         const scheduleResponse = await fetch('data/schedule.json');
         const scheduleData = await scheduleResponse.json();
         
+        // Calculate stats
+        const completedTasks = tasksData.tasks.filter(task => task.status === 'completed');
+        const inProgressTasks = tasksData.tasks.filter(task => task.status === 'in_progress');
+        const pendingTasks = tasksData.tasks.filter(task => task.status === 'pending');
+        const totalScore = completedTasks.reduce((sum, task) => sum + task.points, 0);
+        const maxScore = tasksData.tasks.reduce((sum, task) => sum + task.points, 0);
+        const progressPercentage = Math.round((completedTasks.length / tasksData.tasks.length) * 100);
+        
+        // Update stats
+        document.getElementById('total-score').textContent = totalScore;
+        document.getElementById('completed-tasks').textContent = completedTasks.length;
+        document.getElementById('pending-tasks').textContent = pendingTasks.length + inProgressTasks.length;
+        document.getElementById('upcoming-events').textContent = scheduleData.events.length;
+        
+        // Animate score
+        animateScore(totalScore);
+        
+        // Update progress circle
+        const progressCircle = document.getElementById('progress-circle');
+        const circleRadius = window.innerWidth <= 640 ? 40 : 50; // Responsive radius
+        const circumference = 2 * Math.PI * circleRadius;
+        const offset = circumference - (progressPercentage / 100) * circumference;
+        progressCircle.style.strokeDashoffset = offset;
+        progressCircle.style.strokeDasharray = circumference;
+        
+        document.getElementById('progress-percentage').textContent = progressPercentage + '%';
+        
+        // Update progress bar
+        document.getElementById('overall-progress').style.width = progressPercentage + '%';
+        
         // Render tasks
         const tasksContainer = document.getElementById('tasks-list');
         tasksData.tasks.forEach((task, index) => {
             const taskElement = document.createElement('div');
-            taskElement.className = 'bg-[#0D0D0D] border border-[#DC143C]/20 rounded-lg p-4 flex items-center justify-between card-hover';
+            taskElement.className = 'glass border border-[#DC143C]/20 rounded-lg p-4 flex items-center justify-between card-modern';
             
             const statusClass = `status-${task.status}`;
             const statusText = {
@@ -184,12 +335,12 @@ async function initDashboard() {
                         ${statusText}
                     </div>
                     <div>
-                        <h4 class="font-semibold text-white">${task.name}</h4>
-                        <p class="text-gray-400 text-sm">${task.description}</p>
+                        <h4 class="font-semibold text-gray-800">${task.name}</h4>
+                        <p class="text-gray-600 text-sm">${task.description}</p>
                     </div>
                 </div>
                 <div class="text-right">
-                    <span class="text-[#D4AF37] font-bold">+${task.points} pts</span>
+                    <span class="text-[#960018] font-bold">+${task.points} pts</span>
                     <p class="text-gray-500 text-xs">${task.deadline}</p>
                 </div>
             `;
@@ -201,7 +352,7 @@ async function initDashboard() {
         const scheduleContainer = document.getElementById('schedule-list');
         scheduleData.events.forEach((event, index) => {
             const eventElement = document.createElement('div');
-            eventElement.className = 'bg-[#0D0D0D] border border-[#D4AF37]/20 rounded-lg p-4 card-hover';
+            eventElement.className = 'glass border border-[#D4AF37]/20 rounded-lg p-4 card-modern';
             
             const typeIcon = {
                 'ceremony': '🎭',
@@ -214,28 +365,21 @@ async function initDashboard() {
             eventElement.innerHTML = `
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
-                        <span class="text-2xl">${typeIcon}</span>
+                        <span class="text-2xl animate-float">${typeIcon}</span>
                         <div>
-                            <h4 class="font-semibold text-white">${event.name}</h4>
-                            <p class="text-gray-400 text-sm">${event.location}</p>
+                            <h4 class="font-semibold text-gray-800">${event.name}</h4>
+                            <p class="text-gray-600 text-sm">${event.location}</p>
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="text-[#D4AF37] font-semibold">${event.date}</p>
-                        <p class="text-gray-400 text-sm">${event.time}</p>
+                        <p class="text-[#960018] font-semibold">${event.date}</p>
+                        <p class="text-gray-600 text-sm">${event.time}</p>
                     </div>
                 </div>
             `;
             
             scheduleContainer.appendChild(eventElement);
         });
-        
-        // Calculate and animate score
-        const totalScore = tasksData.tasks
-            .filter(task => task.status === 'completed')
-            .reduce((sum, task) => sum + task.points, 0);
-        
-        animateScore(totalScore);
         
     } catch (error) {
         console.error('Error loading dashboard data:', error);
@@ -357,7 +501,15 @@ function initAnimations() {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.classList.add('animate-fade-in');
+                entry.target.classList.add('animate-fade-in-up');
+                
+                // Add staggered animation to children
+                const children = entry.target.querySelectorAll('.card-modern, .timeline-item, .stat-card');
+                children.forEach((child, index) => {
+                    child.style.animationDelay = `${index * 0.1}s`;
+                    child.classList.add('animate-fade-in-up');
+                });
+                
                 observer.unobserve(entry.target);
             }
         });
@@ -366,6 +518,12 @@ function initAnimations() {
     // Observe all sections
     document.querySelectorAll('section').forEach(section => {
         observer.observe(section);
+    });
+    
+    // Observe individual cards
+    document.querySelectorAll('.card-modern, .timeline-item, .stat-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
     });
 }
 

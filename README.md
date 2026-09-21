@@ -5,13 +5,14 @@ Uma landing page moderna e impressionante para a equipe "Rainha de Copas" da Gin
 ## 🌟 Características
 
 ### Design & Tema
-- **Tema**: Dark Fantasy / Royal Alice in Wonderland
+- **Tema**: Dark Fantasy / Royal Alice in Wonderland (2026 Edition)
 - **Paleta de Cores**: 
   - Royal Crimson (#8B0000 / #DC143C)
   - Obsidian Black (#0D0D0D / #1A1A1A)
   - Royal Gold (#D4AF37)
   - Crisp White (#FFFFFF)
 - **Elementos Visuais**: Naipes de baralho (♠ ♥ ♦ ♣), grids de xadrez, acentos neon vermelho, headers serif elegantês e animações suaves
+- **Inovações 2026**: Glassmorphism, sistema de partículas, animações avançadas, loader profissional, dashboard interativo
 
 ### Seções Principais
 
@@ -45,12 +46,28 @@ Uma landing page moderna e impressionante para a equipe "Rainha de Copas" da Gin
 - **Easter Eggs**: 
   - Clique 3 vezes no Gato de Cheshire para uma surpresa!
   - Atalho de teclado: Ctrl+Q
-- **Animações**: 
+- **Animações Avançadas**: 
   - Floating cards com parallax no mousemove
   - Flip cards para informações detalhadas
-  - Scroll animations e fade-in effects
+  - Scroll animations e fade-in effects com Intersection Observer
   - Glow effects em elementos importantes
-- **Responsividade**: Design mobile-first totalmente responsivo
+  - Sistema de partículas animadas no fundo
+  - Loader profissional com animação de cartas
+  - Magnetic buttons com efeito de atração
+  - Ripple effects nos botões
+  - Neon border effects em cards
+  - Progress bars animadas
+  - Circular progress indicators
+- **Dashboard Interativo**:
+  - Stats cards com métricas em tempo real
+  - Gráfico de progresso circular animado
+  - Progress bar geral das tarefas
+  - Task tracker com status visual
+  - Cronograma de eventos com ícones temáticos
+- **Modal Interativo**:
+  - Modal de detalhes dos membros da equipe
+  - Modal de easter egg da Rainha de Copas
+- **Responsividade**: Design mobile-first totalmente responsivo com ajustes específicos para touch devices
 
 ## 🚀 Como Usar
 
@@ -108,6 +125,22 @@ As cores principais podem ser ajustadas no `css/styles.css`:
 - `#0D0D0D` - Preto (Fundo)
 - `#1A1A1A` - Cinza Escuro (Cards)
 
+### Efeitos Glassmorphism
+O sistema utiliza classes CSS personalizadas para efeitos de vidro:
+- `.glass` - Efeito de vidro padrão
+- `.glass-strong` - Efeito de vidro mais intenso
+- `.glass-gold` - Efeito de vidro com tons dourados
+
+### Animações
+Diversas animações CSS estão disponíveis:
+- `.animate-glow` - Efeito de brilho pulsante
+- `.animate-glow-gold` - Brilho dourado
+- `.animate-float` - Flutuação vertical
+- `.animate-fade-in-up` - Fade in com movimento para cima
+- `.animate-card-flip` - Rotação de card 3D
+- `.animate-shimmer` - Efeito de brilho deslizante
+- E muito mais...
+
 ### Dados
 Todos os dados estão nos arquivos JSON na pasta `data/`:
 - `mascot-materials.json`: Adicione/remova materiais do mascote
@@ -147,9 +180,12 @@ O site é totalmente responsivo e funciona perfeitamente em:
 ## 🚀 Performance
 
 - Otimizado para carregamento rápido
-- Animações CSS suaves
+- Animações CSS suaves com hardware acceleration
 - Lazy loading de dados JSON
 - Minimal dependencies (apenas CDN)
+- Partículas otimizadas com CSS animations
+- Intersection Observer para scroll animations eficientes
+- Prefers-reduced-motion support para acessibilidade
 
 ## 📝 Notas
 
