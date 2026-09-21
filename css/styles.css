@@ -94,13 +94,13 @@ body {
 }
 
 /* Specific color overrides for better contrast */
-.glass .text-[#DC143C],
-.card-modern .text-[#DC143C] {
+.glass .text-\[\#DC143C\],
+.card-modern .text-\[\#DC143C\] {
     color: #960018 !important;
 }
 
-.glass .text-[#D4AF37],
-.card-modern .text-[#D4AF37] {
+.glass .text-\[\#D4AF37\],
+.card-modern .text-\[\#D4AF37\] {
     color: #B8860B !important;
 }
 
