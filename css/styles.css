@@ -104,6 +104,16 @@ body {
     color: #B8860B !important;
 }
 
+/* Ensure mascot cards are visible */
+.card-flip-container .card-flip-front h3,
+.card-flip-container .card-flip-front p {
+    color: #1A1A1A;
+}
+
+.card-flip-container .card-flip-back p {
+    color: #333;
+}
+
 /* Modern Card Styles */
 .card-modern {
     background: rgba(255, 255, 255, 0.95);
@@ -1309,6 +1319,7 @@ section {
 /* Card Flip Container */
 .card-flip-container {
     perspective: 1000px;
+    cursor: pointer;
 }
 
 .card-flip-inner {
@@ -1334,6 +1345,12 @@ section {
 
 .card-flip-back {
     transform: rotateY(180deg);
+}
+
+/* Ensure flip cards work properly on glass background */
+.card-flip-container.glass .card-flip-front,
+.card-flip-container.glass .card-flip-back {
+    background: rgba(255, 255, 255, 0.95);
 }
 
 /* Smooth Scroll */
