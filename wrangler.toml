@@ -1,0 +1,22 @@
+name = "rainha-de-copas-admin"
+main = "worker/index.js"
+compatibility_date = "2024-01-01"
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "rainha-de-copas-db"
+database_id = "YOUR_DATABASE_ID"
+
+# Environment variables (secrets should be set via wrangler secret)
+[vars]
+ENVIRONMENT = "production"
+
+# Development environment
+[env.development]
+name = "rainha-de-copas-admin-dev"
+
+[[env.development.d1_databases]]
+binding = "DB"
+database_name = "rainha-de-copas-db-dev"
+database_id = "YOUR_DEV_DATABASE_ID"
