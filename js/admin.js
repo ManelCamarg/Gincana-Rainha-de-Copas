@@ -5,6 +5,7 @@ class AdminPanel {
         this.currentTab = 'tasks';
         this.editingItem = null;
         this.editingType = null;
+        this.sessionToken = null;
         // Cloudflare Worker URL
         this.apiBaseUrl = 'https://rainha-de-copas-admin.emanuelcamarg9.workers.dev/api';
         
@@ -46,8 +47,10 @@ class AdminPanel {
 
     checkAuth() {
         const session = localStorage.getItem('admin_session');
+        const token = localStorage.getItem('admin_token');
         if (session) {
             this.currentUser = JSON.parse(session);
+            this.sessionToken = token;
             this.showDashboard();
         } else {
             this.showLogin();
@@ -89,7 +92,6 @@ class AdminPanel {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                credentials: 'include',
                 body: JSON.stringify({ email, password })
             });
             
@@ -97,7 +99,9 @@ class AdminPanel {
             
             if (response.ok) {
                 this.currentUser = data.user;
+                this.sessionToken = data.token;
                 localStorage.setItem('admin_session', JSON.stringify(this.currentUser));
+                localStorage.setItem('admin_token', data.token);
                 localStorage.setItem('admin_email', email);
                 this.showDashboard();
                 this.showToast('success', 'Sucesso', 'Login realizado com sucesso!');
@@ -112,18 +116,24 @@ class AdminPanel {
 
     async handleLogout() {
         try {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (this.sessionToken) {
+                headers['Authorization'] = `Bearer ${this.sessionToken}`;
+            }
+            
             await fetch(`${this.apiBaseUrl}/logout`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include'
+                headers: headers
             });
         } catch (error) {
             console.error('Logout error:', error);
         }
         
         localStorage.removeItem('admin_session');
+        localStorage.removeItem('admin_token');
+        this.sessionToken = null;
         this.currentUser = null;
         this.showLogin();
         this.showToast('success', 'Logout', 'Desconectado com sucesso');
@@ -168,8 +178,15 @@ class AdminPanel {
 
     async loadTasks() {
         try {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (this.sessionToken) {
+                headers['Authorization'] = `Bearer ${this.sessionToken}`;
+            }
+            
             const response = await fetch(`${this.apiBaseUrl}/tasks`, {
-                credentials: 'include'
+                headers: headers
             });
             
             if (response.ok) {
@@ -231,8 +248,15 @@ class AdminPanel {
 
     async loadSchedule() {
         try {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (this.sessionToken) {
+                headers['Authorization'] = `Bearer ${this.sessionToken}`;
+            }
+            
             const response = await fetch(`${this.apiBaseUrl}/schedule`, {
-                credentials: 'include'
+                headers: headers
             });
             
             if (response.ok) {
@@ -299,8 +323,15 @@ class AdminPanel {
 
     async loadTeam() {
         try {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (this.sessionToken) {
+                headers['Authorization'] = `Bearer ${this.sessionToken}`;
+            }
+            
             const response = await fetch(`${this.apiBaseUrl}/team`, {
-                credentials: 'include'
+                headers: headers
             });
             
             if (response.ok) {
@@ -350,8 +381,15 @@ class AdminPanel {
 
     async loadLore() {
         try {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (this.sessionToken) {
+                headers['Authorization'] = `Bearer ${this.sessionToken}`;
+            }
+            
             const response = await fetch(`${this.apiBaseUrl}/lore`, {
-                credentials: 'include'
+                headers: headers
             });
             
             if (response.ok) {
@@ -405,8 +443,15 @@ class AdminPanel {
 
     async loadAnnouncements() {
         try {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (this.sessionToken) {
+                headers['Authorization'] = `Bearer ${this.sessionToken}`;
+            }
+            
             const response = await fetch(`${this.apiBaseUrl}/announcements`, {
-                credentials: 'include'
+                headers: headers
             });
             
             if (response.ok) {
@@ -473,8 +518,15 @@ class AdminPanel {
         if (id) {
             // Load existing data from API
             try {
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                if (this.sessionToken) {
+                    headers['Authorization'] = `Bearer ${this.sessionToken}`;
+                }
+                
                 const response = await fetch(`${this.apiBaseUrl}/${type}/${id}`, {
-                    credentials: 'include'
+                    headers: headers
                 });
                 
                 if (response.ok) {
@@ -594,12 +646,16 @@ class AdminPanel {
                 ? `${this.apiBaseUrl}/${this.editingType}/${this.editingItem}`
                 : `${this.apiBaseUrl}/${this.editingType}`;
             
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (this.sessionToken) {
+                headers['Authorization'] = `Bearer ${this.sessionToken}`;
+            }
+            
             const response = await fetch(url, {
                 method: method,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
+                headers: headers,
                 body: JSON.stringify(data)
             });
             
@@ -621,9 +677,16 @@ class AdminPanel {
         if (!confirm('Tem certeza que deseja excluir este item?')) return;
         
         try {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (this.sessionToken) {
+                headers['Authorization'] = `Bearer ${this.sessionToken}`;
+            }
+            
             const response = await fetch(`${this.apiBaseUrl}/${type}/${id}`, {
                 method: 'DELETE',
-                credentials: 'include'
+                headers: headers
             });
             
             if (response.ok) {

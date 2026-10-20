@@ -78,6 +78,17 @@ async function handleApi(request, env, path, corsHeaders) {
 }
 
 async function verifySession(request, env) {
+  // Try token from Authorization header first (for cross-origin)
+  const authHeader = request.headers.get('Authorization');
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.substring(7);
+    const result = await env.DB.prepare(
+      'SELECT user_id, email FROM sessions WHERE session_id = ? AND expires_at > datetime("now")'
+    ).bind(token).first();
+    return result;
+  }
+  
+  // Fallback to cookie (for same-origin)
   const cookieHeader = request.headers.get('Cookie');
   if (!cookieHeader) return null;
   
@@ -128,16 +139,15 @@ async function handleLogin(request, env, corsHeaders) {
     'INSERT INTO sessions (session_id, user_id, expires_at) VALUES (?, ?, ?)'
   ).bind(sessionId, user.id, expiresAt.toISOString()).run();
   
-  // Set HTTP-only cookie
-  // SameSite=None required for cross-origin authentication (GitHub Pages → Cloudflare Worker)
+  // Return session token (for cross-origin auth via localStorage)
   const response = new Response(JSON.stringify({ 
-    user: { id: user.id, email: user.email }
+    user: { id: user.id, email: user.email },
+    token: sessionId
   }), {
     status: 200,
     headers: {
       ...corsHeaders,
-      'Content-Type': 'application/json',
-      'Set-Cookie': `session=${sessionId}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=86400`
+      'Content-Type': 'application/json'
     }
   });
   
