@@ -1,0 +1,176 @@
+================================================================================
+SISTEMA ADMIN RAINHA DE COPAS - STATUS DO PROJETO
+================================================================================
+Data: 20/10/2026
+================================================================================
+
+RESUMO DO PROJETO:
+------------------
+Sistema de painel admin remoto para o site da Gincana Rainha de Copas 2026.
+Arquitetura: GitHub Pages (frontend) + Cloudflare Worker (API) + Cloudflare D1 (banco de dados)
+
+
+LINKS IMPORTANTES:
+------------------
+GitHub Repository: https://github.com/ManelCamarg/Gincana-Rainha-de-Copas
+GitHub Pages (site público): https://manelcamarg.github.io/Gincana-Rainha-de-Copas/
+GitHub Pages (admin panel): https://manelcamarg.github.io/Gincana-Rainha-de-Copas/admin.html
+Cloudflare Dashboard: https://dash.cloudflare.com
+Cloudflare Worker: https://rainha-de-copas-admin.emanuelcamarg9.workers.dev
+
+
+CREDENCIAIS:
+------------
+Email do admin: admin@gincana2026.com
+Senha: Gincana2026! (mudar depois para algo mais seguro)
+
+
+O QUE FOI FEITO ATÉ AGORA:
+---------------------------
+1. ✅ Criado Worker Cloudflare (rainha-de-copas-admin)
+2. ✅ Criado banco de dados D1 (rainha-de-copas-db)
+3. ✅ Configurado binding D1 no Worker
+4. ✅ Criado schema do banco (7 tabelas: users, sessions, tasks, schedule, team_members, lore_story, announcements)
+5. ✅ Inserido dados de exemplo no banco
+6. ✅ Criado usuário admin no banco
+7. ✅ Implementado sistema de autenticação com TOKEN (não cookie)
+8. ✅ Modificado admin.js para usar token Bearer
+9. ✅ Commit e push no GitHub
+
+
+ARQUIVOS MODIFICADOS:
+--------------------
+- worker/index.js (API Cloudflare Worker)
+- js/admin.js (frontend admin panel)
+- database/schema.sql (schema do banco)
+- wrangler.toml (configuração Cloudflare)
+- wrangler.jsonc (configuração Cloudflare)
+- index.html (link para admin no footer)
+
+
+PROBLEMAS ENCONTRADOS E SOLUÇÕES:
+----------------------------------
+
+PROBLEMA 1: Cookie cross-origin não funcionava
+SOLUÇÃO: Mudou de cookie para token Bearer em Authorization header
+
+PROBLEMA 2: Senha hash não compatível
+SOLUÇÃO: Mudou para SHA-256 simples (sem salt)
+
+PROBLEMA 3: CORS bloqueando requests
+SOLUÇÃO: Configurado CORS para GitHub Pages origin com Authorization header
+
+
+STATUS ATUAL:
+-------------
+- ✅ GitHub Pages atualizado com código mais recente
+- ❓ Cloudflare Worker PRECISA ser verificado se está atualizado
+- ✅ Banco de dados D1 configurado com dados
+- ✅ Login funciona (retorna token)
+- ❌ Carregamento de dados ainda não funciona (erro 401 Unauthorized)
+
+
+PROBLEMA ATUAL:
+--------------
+O admin panel carrega, mas não carrega os dados (tarefas, cronograma, etc).
+Erro no console: "No 'Access-Control-Allow-Origin' header is present"
+Token está sendo salvo no localStorage corretamente.
+
+
+PRÓXIMOS PASSOS (QUANDO CHEGAR EM CASA):
+----------------------------------------
+
+PASSO 1: Verificar se o Worker está atualizado no Cloudflare
+-------------------------------------------------------------
+1. Acesse: https://dash.cloudflare.com
+2. Clique em "Workers & Pages"
+3. Clique no Worker "rainha-de-copas-admin"
+4. Clique em "Edit code"
+5. Procure pela linha: if (authHeader && authHeader.startsWith('Bearer '))
+6. Se essa linha NÃO existir, o Worker NÃO está atualizado
+
+PASSO 2: Se o Worker não estiver atualizado
+-------------------------------------------
+1. No computador, abra o arquivo worker/index.js
+2. Copie TODO o código (Ctrl+A, Ctrl+C)
+3. No Cloudflare Worker, apague o código atual (Ctrl+A, Delete)
+4. Cole o código copiado (Ctrl+V)
+5. Clique em "Save and Deploy"
+6. Espere o deploy terminar
+
+PASSO 3: Testar
+--------------
+1. Abra: https://manelcamarg.github.io/Gincana-Rainha-de-Copas/admin.html
+2. Faça login com: admin@gincana2026.com / Gincana2026!
+3. Abra o console (F12)
+4. Verifique se os dados carregam
+5. Se ainda não funcionar, envie o erro do console
+
+
+VERIFICAÇÕES RÁPIDAS:
+-------------------
+- Token está no localStorage? → No console digite: localStorage.getItem('admin_token')
+- Deve aparecer: "8efecf79-6838-4175-acc1-72fe25fe6ce5" (ou outro UUID)
+- Se aparecer null, precisa fazer login novamente
+
+
+COMO CONTINUAR COM O DEVIN EM CASA:
+----------------------------------
+1. Clone o repositório: git clone https://github.com/ManelCamarg/Gincana-Rainha-de-Copas.git
+2. Abra o projeto no Devin CLI
+3. Me explique resumidamente: "Estou configurando admin panel Cloudflare. Worker e D1 configurados, mas dados não carregam no painel (erro 401). Token está salvo no localStorage."
+4. Eu vou ler os arquivos e continuar de onde parou
+
+
+INFORMAÇÕES TÉCNICAS:
+--------------------
+- Cloudflare Worker ID: 31adbb6a-78f2-4054-8df5-fedd205172e4
+- D1 Database ID: 31adbb6a-78f2-4054-8df5-fedd205172e4
+- Worker URL: https://rainha-de-copas-admin.emanuelcamarg9.workers.dev
+- API Base URL: https://rainha-de-copas-admin.emanuelcamarg9.workers.dev/api
+- CORS Origin: https://manelcamarg.github.io
+
+
+ARQUITETURA:
+-----------
+GitHub Pages (manelcamarg.github.io)
+  ↓ (faz requests com Authorization: Bearer <token>)
+Cloudflare Worker (rainha-de-copas-admin.workers.dev)
+  ↓ (verifica token no banco D1)
+Cloudflare D1 (banco de dados SQLite)
+
+
+NOTAS IMPORTANTES:
+-----------------
+- O sistema usa token Bearer, não cookie (devido a cross-origin)
+- O token é salvo no localStorage
+- O Worker precisa estar atualizado com o código mais recente
+- GitHub Pages atualiza automaticamente após push
+- Cloudflare Worker precisa ser atualizado manualmente no Dashboard
+
+
+ERROS COMUNS E SOLUÇÕES:
+-------------------------
+Erro 401 Unauthorized:
+  - Verifique se o Worker está atualizado
+  - Verifique se o token está no localStorage
+  - Verifique se o token está sendo enviado no Authorization header
+
+Erro CORS:
+  - Verifique se o Worker tem os headers CORS configurados
+  - Verifique se a origem está configurada corretamente
+
+Login funciona mas dados não carregam:
+  - Verifique se o Worker foi atualizado no Cloudflare Dashboard
+  - O código local está atualizado, mas o Worker pode estar com código antigo
+
+
+CONTATO SUPORTE:
+---------------
+Se precisar de ajuda, continue usando o Devin CLI e explique o contexto
+com base neste arquivo.
+
+
+================================================================================
+FIM DO DOCUMENTO
+================================================================================
