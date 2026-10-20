@@ -252,33 +252,10 @@ async function hashPassword(password) {
 
 async function deriveKey(password, salt) {
   const encoder = new TextEncoder();
-  const passwordBuffer = encoder.encode(password);
-  const saltBuffer = typeof salt === 'string' 
-    ? new Uint8Array(salt.match(/.{1,2}/g).map(byte => parseInt(byte, 16)))
-    : salt;
-  
-  // Import password as key material
-  const keyMaterial = await crypto.subtle.importKey(
-    'raw',
-    passwordBuffer,
-    'PBKDF2',
-    false,
-    ['deriveBits']
-  );
-  
-  // Derive key using PBKDF2 with SHA-256
-  const derivedBits = await crypto.subtle.deriveBits(
-    {
-      name: 'PBKDF2',
-      salt: saltBuffer,
-      iterations: 100000, // Strong iteration count for security
-      hash: 'SHA-256'
-    },
-    keyMaterial,
-    256 // 256-bit output
-  );
-  
-  return Array.from(new Uint8Array(derivedBits)).map(b => b.toString(16).padStart(2, '0')).join('');
+  const data = encoder.encode(password + salt);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 async function verifyPassword(password, storedHash, storedSalt) {

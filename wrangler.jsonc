@@ -1,0 +1,12 @@
+{
+  "name": "rainha-de-copas-admin",
+  "main": "worker/index.js",
+  "compatibility_date": "2024-01-01",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "rainha-de-copas-db",
+      "database_id": "31adbb6a-78f2-4054-8df5-fedd205172e4"
+    }
+  ]
+}

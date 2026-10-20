@@ -5,9 +5,8 @@ class AdminPanel {
         this.currentTab = 'tasks';
         this.editingItem = null;
         this.editingType = null;
-        // TODO: Update this with your deployed Cloudflare Worker URL
-        // Example: 'https://rainha-de-copas-admin.YOUR_SUBDOMAIN.workers.dev/api'
-        this.apiBaseUrl = '/api'; // Change to your Worker URL + '/api'
+        // Cloudflare Worker URL
+        this.apiBaseUrl = 'https://rainha-de-copas-admin.emanuelcamarg9.workers.dev/api';
         
         this.init();
     }
