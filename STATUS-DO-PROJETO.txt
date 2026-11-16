@@ -71,8 +71,8 @@ STATUS ATUAL:
 - ✅ Editar/excluir corrigido: frontend usava /api/task, /api/event etc
   mas Worker só conhece tasks, schedule, team, lore, announcements
   (erro "Not Found") — commit eb672de
-- ⚠️ D1 só tinha 3 linhas de exemplo por tabela; site real tem 8 tasks,
-  8 events, 8 members, 5 capítulos → rodar database/import-data.sql no D1
+- ✅ D1 populado com dados reais: 8 tasks, 8 schedule, 8 team, 5 lore
+  (verificado via /api/public/* em 16/11/2026)
 - ✅ Site público agora lê dados AO VIVO do D1 via rotas públicas
   GET /api/public/{tasks,schedule,team,lore,announcements} (sem login)
   com fallback automático para data/*.json — commit 38a695d
