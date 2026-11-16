@@ -673,12 +673,25 @@ class AdminPanel {
                 this.showToast('success', 'Sucesso', 'Alterações salvas no Cloudflare D1!');
                 this.switchTab(this.currentTab);
             } else {
-                const errorData = await response.json();
-                this.showToast('error', 'Erro', errorData.error || 'Falha ao salvar');
+                const errorData = await this.parseError(response);
+                this.showToast('error', `Erro ${response.status}`, errorData.error || errorData.message || 'Falha ao salvar');
             }
         } catch (error) {
             console.error('Error saving changes:', error);
-            this.showToast('error', 'Erro', 'Falha ao conectar com o servidor');
+            this.showToast('error', 'Erro', `Falha ao conectar com o servidor: ${error.message}`);
+        }
+    }
+
+    async parseError(response) {
+        try {
+            return await response.json();
+        } catch (e) {
+            try {
+                const text = await response.text();
+                return { error: text.slice(0, 200) || `HTTP ${response.status}` };
+            } catch (e2) {
+                return { error: `HTTP ${response.status}` };
+            }
         }
     }
 
@@ -702,12 +715,12 @@ class AdminPanel {
                 this.showToast('success', 'Sucesso', 'Item excluído do Cloudflare D1!');
                 this.switchTab(this.currentTab);
             } else {
-                const errorData = await response.json();
-                this.showToast('error', 'Erro', errorData.error || 'Falha ao excluir');
+                const errorData = await this.parseError(response);
+                this.showToast('error', `Erro ${response.status}`, errorData.error || errorData.message || 'Falha ao excluir');
             }
         } catch (error) {
             console.error('Error deleting item:', error);
-            this.showToast('error', 'Erro', 'Falha ao conectar com o servidor');
+            this.showToast('error', 'Erro', `Falha ao conectar com o servidor: ${error.message}`);
         }
     }
 
