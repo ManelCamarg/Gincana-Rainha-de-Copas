@@ -75,6 +75,15 @@ async function handlePublicApi(request, env, path, corsHeaders) {
   }
   
   const resource = path.split('/').filter(s => s)[2];
+  
+  if (resource === 'score') {
+    const score = await getScore(env);
+    return new Response(JSON.stringify(score), {
+      status: 200,
+      headers: jsonHeaders
+    });
+  }
+  
   const table = PUBLIC_TABLES[resource];
   
   if (!table) {
@@ -130,6 +139,8 @@ async function handleApi(request, env, path, corsHeaders) {
       return handleLore(request, env, id, method, corsHeaders);
     case 'announcements':
       return handleAnnouncements(request, env, id, method, corsHeaders);
+    case 'score':
+      return handleScore(request, env, method, corsHeaders);
     default:
       return new Response(JSON.stringify({ error: 'Not Found' }), {
         status: 404,
@@ -242,6 +253,50 @@ async function handleLogout(request, env, corsHeaders) {
       'Content-Type': 'application/json',
       'Set-Cookie': 'session=; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=0'
     }
+  });
+}
+
+async function getScore(env) {
+  const row = await env.DB.prepare(
+    "SELECT COALESCE(SUM(points), 0) AS total FROM tasks WHERE status = 'completed'"
+  ).first();
+  const calculated = row ? row.total : 0;
+  
+  const setting = await env.DB.prepare(
+    "SELECT value FROM settings WHERE key = 'score_bonus'"
+  ).first();
+  const bonus = setting ? (parseInt(setting.value, 10) || 0) : 0;
+  
+  return { calculated, bonus, total: calculated + bonus };
+}
+
+async function handleScore(request, env, method, corsHeaders) {
+  const jsonHeaders = { ...corsHeaders, 'Content-Type': 'application/json' };
+  
+  if (method === 'GET') {
+    const score = await getScore(env);
+    return new Response(JSON.stringify(score), { status: 200, headers: jsonHeaders });
+  }
+  
+  if (method === 'PUT') {
+    const { bonus } = await request.json();
+    const bonusInt = parseInt(bonus, 10);
+    if (isNaN(bonusInt)) {
+      return new Response(JSON.stringify({ error: 'bonus must be a number' }), {
+        status: 400,
+        headers: jsonHeaders
+      });
+    }
+    await env.DB.prepare(
+      "INSERT OR REPLACE INTO settings (key, value) VALUES ('score_bonus', ?)"
+    ).bind(String(bonusInt)).run();
+    const score = await getScore(env);
+    return new Response(JSON.stringify(score), { status: 200, headers: jsonHeaders });
+  }
+  
+  return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+    status: 405,
+    headers: jsonHeaders
   });
 }
 

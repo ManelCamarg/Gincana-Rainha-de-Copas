@@ -443,11 +443,21 @@ async function initDashboard() {
         const tasksData = { tasks: await fetchCollection('tasks', 'tasks.json', 'tasks') };
         const scheduleData = { events: await fetchCollection('schedule', 'schedule.json', 'events') };
         
+        // Fetch manual score bonus set in the admin panel
+        let scoreBonus = 0;
+        try {
+            const scoreResponse = await fetch(`${API_BASE}/score`);
+            if (scoreResponse.ok) {
+                const scoreData = await scoreResponse.json();
+                scoreBonus = scoreData.bonus || 0;
+            }
+        } catch (e) { /* bonus stays 0 if API is down */ }
+        
         // Calculate stats
         const completedTasks = tasksData.tasks.filter(task => task.status === 'completed');
         const inProgressTasks = tasksData.tasks.filter(task => task.status === 'in_progress');
         const pendingTasks = tasksData.tasks.filter(task => task.status === 'pending');
-        const totalScore = completedTasks.reduce((sum, task) => sum + task.points, 0);
+        const totalScore = completedTasks.reduce((sum, task) => sum + task.points, 0) + scoreBonus;
         const maxScore = tasksData.tasks.reduce((sum, task) => sum + task.points, 0);
         const progressPercentage = Math.round((completedTasks.length / (tasksData.tasks.length || 1)) * 100);
         

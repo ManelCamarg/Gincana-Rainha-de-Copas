@@ -44,6 +44,9 @@ class AdminPanel {
         document.getElementById('add-chapter-btn').addEventListener('click', () => this.openEditModal('chapter'));
         document.getElementById('add-announcement-btn').addEventListener('click', () => this.openEditModal('announcement'));
         
+        // Score save button
+        document.getElementById('save-score-btn').addEventListener('click', () => this.saveScore());
+        
         // Modal controls
         document.getElementById('close-modal').addEventListener('click', () => this.closeModal());
         document.getElementById('cancel-btn').addEventListener('click', () => this.closeModal());
@@ -181,6 +184,9 @@ class AdminPanel {
             case 'announcements':
                 this.loadAnnouncements();
                 break;
+            case 'score':
+                this.loadScore();
+                break;
         }
     }
 
@@ -237,7 +243,12 @@ class AdminPanel {
                             <span>${task.deadline}</span>
                         </div>
                     </div>
-                    <div class="flex space-x-2 ml-4">
+                    <div class="flex items-center space-x-2 ml-4">
+                        <select class="status-select px-2 py-1 rounded text-sm bg-[#1A1A1A] border border-gray-600 text-white" data-id="${task.id}">
+                            <option value="pending" ${task.status === 'pending' ? 'selected' : ''}>Pendente</option>
+                            <option value="in_progress" ${task.status === 'in_progress' ? 'selected' : ''}>Em Andamento</option>
+                            <option value="completed" ${task.status === 'completed' ? 'selected' : ''}>Concluído</option>
+                        </select>
                         <button class="edit-btn px-3 py-1 bg-[#DC143C] hover:bg-[#8B0000] text-white rounded text-sm" data-id="${task.id}">Editar</button>
                         <button class="delete-btn px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm" data-id="${task.id}">Excluir</button>
                     </div>
@@ -246,6 +257,9 @@ class AdminPanel {
             container.appendChild(card);
         });
         
+        container.querySelectorAll('.status-select').forEach(sel => {
+            sel.addEventListener('change', () => this.quickUpdateStatus('task', parseInt(sel.dataset.id), sel.value));
+        });
         container.querySelectorAll('.edit-btn').forEach(btn => {
             btn.addEventListener('click', () => this.openEditModal('task', parseInt(btn.dataset.id)));
         });
@@ -696,6 +710,90 @@ class AdminPanel {
             } catch (e2) {
                 return { error: `HTTP ${response.status}` };
             }
+        }
+    }
+
+    async quickUpdateStatus(type, id, status) {
+        try {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (this.sessionToken) {
+                headers['Authorization'] = `Bearer ${this.sessionToken}`;
+            }
+            
+            const response = await fetch(`${this.apiBaseUrl}/${this.typeEndpoints[type]}/${id}`, {
+                method: 'PUT',
+                headers: headers,
+                body: JSON.stringify({ status: status })
+            });
+            
+            if (response.ok) {
+                this.showToast('success', 'Sucesso', 'Status atualizado!');
+            } else {
+                const errorData = await this.parseError(response);
+                this.showToast('error', `Erro ${response.status}`, errorData.detail || errorData.error || 'Falha ao atualizar');
+            }
+        } catch (error) {
+            console.error('Error updating status:', error);
+            this.showToast('error', 'Erro', `Falha ao conectar com o servidor: ${error.message}`);
+        }
+        this.switchTab(this.currentTab);
+    }
+
+    async loadScore() {
+        try {
+            const headers = {};
+            if (this.sessionToken) {
+                headers['Authorization'] = `Bearer ${this.sessionToken}`;
+            }
+            
+            const response = await fetch(`${this.apiBaseUrl}/score`, { headers: headers });
+            
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('score-calculated').textContent = data.calculated;
+                document.getElementById('score-bonus').value = data.bonus;
+                document.getElementById('score-total').textContent = data.total;
+            } else {
+                this.showToast('error', 'Erro', 'Falha ao carregar pontuação');
+            }
+        } catch (error) {
+            console.error('Error loading score:', error);
+            this.showToast('error', 'Erro', 'Falha ao conectar com o servidor');
+        }
+    }
+
+    async saveScore() {
+        const bonus = parseInt(document.getElementById('score-bonus').value, 10);
+        
+        try {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (this.sessionToken) {
+                headers['Authorization'] = `Bearer ${this.sessionToken}`;
+            }
+            
+            const response = await fetch(`${this.apiBaseUrl}/score`, {
+                method: 'PUT',
+                headers: headers,
+                body: JSON.stringify({ bonus: isNaN(bonus) ? 0 : bonus })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('score-calculated').textContent = data.calculated;
+                document.getElementById('score-bonus').value = data.bonus;
+                document.getElementById('score-total').textContent = data.total;
+                this.showToast('success', 'Sucesso', 'Pontuação atualizada!');
+            } else {
+                const errorData = await this.parseError(response);
+                this.showToast('error', `Erro ${response.status}`, errorData.detail || errorData.error || 'Falha ao salvar pontuação');
+            }
+        } catch (error) {
+            console.error('Error saving score:', error);
+            this.showToast('error', 'Erro', `Falha ao conectar com o servidor: ${error.message}`);
         }
     }
 
