@@ -1,7 +1,7 @@
 ================================================================================
 SISTEMA ADMIN RAINHA DE COPAS - STATUS DO PROJETO
 ================================================================================
-Data: 20/10/2026
+Data: 16/11/2026 (atualizado)
 ================================================================================
 
 RESUMO DO PROJETO:
@@ -64,47 +64,48 @@ SOLUÇÃO: Configurado CORS para GitHub Pages origin com Authorization header
 STATUS ATUAL:
 -------------
 - ✅ GitHub Pages atualizado com código mais recente
-- ❓ Cloudflare Worker PRECISA ser verificado se está atualizado
+- ✅ Cloudflare Worker VERIFICADO: já está com o código novo (login retorna token)
 - ✅ Banco de dados D1 configurado com dados
 - ✅ Login funciona (retorna token)
-- ❌ Carregamento de dados ainda não funciona (erro 401 Unauthorized)
+- ❌ Rotas autenticadas davam erro 500 (bug corrigido em 16/11/2026)
 
 
-PROBLEMA ATUAL:
---------------
-O admin panel carrega, mas não carrega os dados (tarefas, cronograma, etc).
-Erro no console: "No 'Access-Control-Allow-Origin' header is present"
-Token está sendo salvo no localStorage corretamente.
+PROBLEMA ENCONTRADO EM 16/11/2026 (CORRIGIDO NO CÓDIGO):
+------------------------------------------------------
+Erro 500 (error code 1101) em TODAS as rotas autenticadas (/api/tasks,
+/api/schedule, etc), mesmo com token válido.
+
+CAUSA RAIZ:
+- verifySession() fazia "SELECT user_id, email FROM sessions", mas a tabela
+  sessions NÃO tem coluna "email" → D1 lançava exceção → erro 500.
+- Bug secundário: expires_at era gravado em formato ISO ("2026-11-17T...Z")
+  e comparado com datetime("now") ("2026-11-16 12:00:00") — comparação por
+  string fazia sessões quase nunca expirarem.
+- handleLogout() só apagava a sessão via cookie, não via token Bearer.
+
+CORREÇÃO APLICADA (commit 30d7d55, já no GitHub):
+- SELECT corrigido para "SELECT user_id FROM sessions ..."
+- expires_at agora gravado como "YYYY-MM-DD HH:MM:SS" (formato compatível)
+- Logout agora apaga a sessão também quando usa Bearer token
 
 
-PRÓXIMOS PASSOS (QUANDO CHEGAR EM CASA):
-----------------------------------------
+PRÓXIMO PASSO (ÚNICO MANUAL):
+------------------------------
+O código corrigido precisa ser COLADO no Cloudflare Worker (o deploy via
+wrangler não foi possível pois não há Node.js neste computador).
 
-PASSO 1: Verificar se o Worker está atualizado no Cloudflare
--------------------------------------------------------------
-1. Acesse: https://dash.cloudflare.com
-2. Clique em "Workers & Pages"
-3. Clique no Worker "rainha-de-copas-admin"
-4. Clique em "Edit code"
-5. Procure pela linha: if (authHeader && authHeader.startsWith('Bearer '))
-6. Se essa linha NÃO existir, o Worker NÃO está atualizado
-
-PASSO 2: Se o Worker não estiver atualizado
--------------------------------------------
-1. No computador, abra o arquivo worker/index.js
-2. Copie TODO o código (Ctrl+A, Ctrl+C)
-3. No Cloudflare Worker, apague o código atual (Ctrl+A, Delete)
-4. Cole o código copiado (Ctrl+V)
+1. Abra: https://dash.cloudflare.com → Workers & Pages → rainha-de-copas-admin
+2. Clique em "Edit code"
+3. Apague TODO o código atual (Ctrl+A, Delete)
+4. Abra o arquivo worker/index.js deste projeto, copie TODO (Ctrl+A, Ctrl+C)
+   e cole no editor do Worker (Ctrl+V)
 5. Clique em "Save and Deploy"
-6. Espere o deploy terminar
+6. Teste: https://manelcamarg.github.io/Gincana-Rainha-de-Copas/admin.html
+   Login: admin@gincana2026.com / Gincana2026!
 
-PASSO 3: Testar
---------------
-1. Abra: https://manelcamarg.github.io/Gincana-Rainha-de-Copas/admin.html
-2. Faça login com: admin@gincana2026.com / Gincana2026!
-3. Abra o console (F12)
-4. Verifique se os dados carregam
-5. Se ainda não funcionar, envie o erro do console
+ALTERNATIVA (deploy automático no futuro):
+- Instale Node.js (https://nodejs.org), rode "npm install -g wrangler",
+  depois "wrangler login" e "wrangler deploy" dentro da pasta do projeto.
 
 
 VERIFICAÇÕES RÁPIDAS:
