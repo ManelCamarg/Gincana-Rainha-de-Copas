@@ -1,13 +1,18 @@
 ================================================================================
 SISTEMA ADMIN RAINHA DE COPAS - STATUS DO PROJETO
 ================================================================================
-Data: 16/11/2026 (atualizado)
+Data: 16/11/2026 (fim do dia - TUDO FUNCIONANDO)
 ================================================================================
 
 RESUMO DO PROJETO:
 ------------------
 Sistema de painel admin remoto para o site da Gincana Rainha de Copas 2026.
 Arquitetura: GitHub Pages (frontend) + Cloudflare Worker (API) + Cloudflare D1 (banco de dados)
+
+STATUS GERAL: ✅ PROJETO FUNCIONAL
+- Site público lê dados AO VIVO do banco D1
+- Painel admin com CRUD completo funcionando (criar, editar, excluir)
+- Dashboard com pontuação automática + ajuste manual
 
 
 LINKS IMPORTANTES:
@@ -22,165 +27,165 @@ Cloudflare Worker: https://rainha-de-copas-admin.emanuelcamarg9.workers.dev
 CREDENCIAIS:
 ------------
 Email do admin: admin@gincana2026.com
-Senha: Gincana2026! (mudar depois para algo mais seguro)
+Senha: Gincana2026! (TROCAR por uma mais segura quando possível)
 
 
-O QUE FOI FEITO ATÉ AGORA:
----------------------------
-1. ✅ Criado Worker Cloudflare (rainha-de-copas-admin)
-2. ✅ Criado banco de dados D1 (rainha-de-copas-db)
-3. ✅ Configurado binding D1 no Worker
-4. ✅ Criado schema do banco (7 tabelas: users, sessions, tasks, schedule, team_members, lore_story, announcements)
-5. ✅ Inserido dados de exemplo no banco
-6. ✅ Criado usuário admin no banco
-7. ✅ Implementado sistema de autenticação com TOKEN (não cookie)
-8. ✅ Modificado admin.js para usar token Bearer
-9. ✅ Commit e push no GitHub
+O QUE ESTÁ PRONTO E FUNCIONANDO:
+-------------------------------
+INFRAESTRUTURA:
+1. ✅ Worker Cloudflare (rainha-de-copas-admin) deployado e atualizado
+2. ✅ Banco D1 (rainha-de-copas-db) com tabelas: users, sessions, tasks,
+   schedule, team_members, lore_story, announcements, settings
+3. ✅ Autenticação por TOKEN Bearer (localStorage), sessões de 24h
+4. ✅ CORS configurado para https://manelcamarg.github.io
+5. ✅ Error handler global no Worker (erros voltam JSON com CORS, não página 1101)
+
+PAINEL ADMIN (admin.html):
+6. ✅ Login/logout funcional
+7. ✅ CRUD completo: Tarefas, Cronograma, Equipe, História, Anúncios
+8. ✅ Dropdown de status rápido nas tarefas (Pendente/Em Andamento/Concluído)
+   - Marca "Concluído" → pontos contabilizam na hora no dashboard
+9. ✅ Aba "Pontuação": mostra pontos calculados + ajuste manual + total
+   (aceita valores negativos para correções)
+10. ✅ Toasts de erro mostram o erro real do servidor
+
+SITE PÚBLICO (index.html):
+11. ✅ Lê dados AO VIVO do D1 via rotas públicas GET /api/public/*
+    (sem login): tasks, schedule, team, lore, announcements
+12. ✅ Fallback automático para data/*.json se a API estiver fora
+13. ✅ Dashboard soma pontos de tarefas concluídas + ajuste manual
+14. ✅ mascot-materials continua em JSON (não tem tabela no D1)
+
+BANCO DE DADOS (D1):
+15. ✅ Dados reais importados: 8 tasks, 8 schedule, 8 team, 5 lore
+16. ✅ Tabela settings criada (guarda score_bonus do ajuste manual)
+17. ✅ Whitelist de colunas no Worker (filterColumns) - campos inválidos
+    são descartados em vez de quebrar a query
+
+CORREÇÕES DE BUGS FEITAS HOJE (16/11):
+--------------------------------------
+- verifySession pedia coluna "email" inexistente em sessions → erro 500
+  em todas as rotas autenticadas (commit 30d7d55)
+- expires_at em formato ISO quebrava comparação de expiração (corrigido)
+- Logout não apagava sessão via token Bearer (corrigido)
+- Frontend chamava /api/task, /api/event etc → 404 (mapa typeEndpoints,
+  commit eb672de)
+- saveChanges enviava is_active=false em todos os tipos → "no such column"
+  → erro 500/CORS no navegador (commit 293a158)
+- Badge "Em Andamento" sem estilo: classe status-in_progress (underline)
+  não batia com CSS .status-in-progress (hífen) → texto branco invisível
+  (commit 3559a1a)
+- Contraste: aba Pontuação com texto branco/dourado claro em card branco;
+  link "Painel" do footer cinza claro (commit 7b91f6a)
 
 
-ARQUIVOS MODIFICADOS:
+ARQUIVOS DO PROJETO:
 --------------------
-- worker/index.js (API Cloudflare Worker)
-- js/admin.js (frontend admin panel)
-- database/schema.sql (schema do banco)
-- wrangler.toml (configuração Cloudflare)
-- wrangler.jsonc (configuração Cloudflare)
-- index.html (link para admin no footer)
+- worker/index.js      → API Cloudflare Worker (rotas /api/* e /api/public/*)
+- js/admin.js          → painel admin (login, CRUD, status rápido, pontuação)
+- js/main.js           → site público (busca API com fallback JSON)
+- admin.html           → página do painel admin
+- index.html           → site público
+- css/styles.css       → estilos do site (inclui status badges)
+- css/admin.css        → estilos do admin
+- database/schema.sql  → schema original do banco
+- database/import-data.sql → script de importação dos dados reais + settings
+- data/*.json          → fallback estático do site
+- wrangler.toml / wrangler.jsonc → config Cloudflare (deploy via wrangler)
 
 
-PROBLEMAS ENCONTRADOS E SOLUÇÕES:
-----------------------------------
+COMO ATUALIZAR O WORKER (manual, ~2 min):
+------------------------------------------
+O Worker NÃO atualiza sozinho. Sempre que worker/index.js mudar:
+1. https://dash.cloudflare.com → Workers & Pages → rainha-de-copas-admin
+2. "Edit code" → Ctrl+A → Delete
+3. Colar worker/index.js inteiro → "Save and Deploy"
 
-PROBLEMA 1: Cookie cross-origin não funcionava
-SOLUÇÃO: Mudou de cookie para token Bearer em Authorization header
-
-PROBLEMA 2: Senha hash não compatível
-SOLUÇÃO: Mudou para SHA-256 simples (sem salt)
-
-PROBLEMA 3: CORS bloqueando requests
-SOLUÇÃO: Configurado CORS para GitHub Pages origin com Authorization header
+ÚLTIMA ATUALIZAÇÃO FEITA: 16/11/2026 (versão com /api/public/, /api/score,
+error handler e whitelist de colunas)
 
 
-STATUS ATUAL:
--------------
-- ✅ GitHub Pages atualizado com código mais recente
-- ✅ Cloudflare Worker VERIFICADO: já está com o código novo (login retorna token)
-- ✅ Banco de dados D1 configurado com dados
-- ✅ Login funciona (retorna token)
-- ✅ Rotas autenticadas corrigidas (SELECT email bug) — commit 30d7d55
-- ✅ Editar/excluir corrigido: frontend usava /api/task, /api/event etc
-  mas Worker só conhece tasks, schedule, team, lore, announcements
-  (erro "Not Found") — commit eb672de
-- ✅ D1 populado com dados reais: 8 tasks, 8 schedule, 8 team, 5 lore
-  (verificado via /api/public/* em 16/11/2026)
-- ✅ Site público agora lê dados AO VIVO do D1 via rotas públicas
-  GET /api/public/{tasks,schedule,team,lore,announcements} (sem login)
-  com fallback automático para data/*.json — commit 38a695d
-- ⚠️ PENDENTE: atualizar o Worker no Cloudflare com o novo worker/index.js
-  (contém as rotas /api/public/) — sem isso o site usa os JSONs (fallback)
-- ℹ️ mascot-materials continua em JSON (não tem tabela no D1)
-- ℹ️ announcements público filtra is_active = 1
-- ✅ BUG FINAL RESOLVIDO (16/11): saveChanges enviava is_active=false em
-  TODOS os tipos → "no such column: is_active" (500) pois só a tabela
-  announcements tem essa coluna. Corrigido: is_active só vai p/ announcements
-  + Worker agora tem whitelist de colunas por tabela (filterColumns).
-  commits 293a158 (fix) e b1b1ab8 (error handler global com CORS)
+COMO RODAR SQL NO D1 (manual):
+-------------------------------
+1. dash.cloudflare.com → D1 → rainha-de-copas-db → aba "Console"
+2. Colar o SQL → Execute
+(usado para: importar dados, criar tabela settings, deletes de limpeza)
 
 
-PROBLEMA ENCONTRADO EM 16/11/2026 (CORRIGIDO NO CÓDIGO):
-------------------------------------------------------
-Erro 500 (error code 1101) em TODAS as rotas autenticadas (/api/tasks,
-/api/schedule, etc), mesmo com token válido.
-
-CAUSA RAIZ:
-- verifySession() fazia "SELECT user_id, email FROM sessions", mas a tabela
-  sessions NÃO tem coluna "email" → D1 lançava exceção → erro 500.
-- Bug secundário: expires_at era gravado em formato ISO ("2026-11-17T...Z")
-  e comparado com datetime("now") ("2026-11-16 12:00:00") — comparação por
-  string fazia sessões quase nunca expirarem.
-- handleLogout() só apagava a sessão via cookie, não via token Bearer.
-
-CORREÇÃO APLICADA (commit 30d7d55, já no GitHub):
-- SELECT corrigido para "SELECT user_id FROM sessions ..."
-- expires_at agora gravado como "YYYY-MM-DD HH:MM:SS" (formato compatível)
-- Logout agora apaga a sessão também quando usa Bearer token
-
-
-PRÓXIMO PASSO (ÚNICO MANUAL):
-------------------------------
-O código corrigido precisa ser COLADO no Cloudflare Worker (o deploy via
-wrangler não foi possível pois não há Node.js neste computador).
-
-1. Abra: https://dash.cloudflare.com → Workers & Pages → rainha-de-copas-admin
-2. Clique em "Edit code"
-3. Apague TODO o código atual (Ctrl+A, Delete)
-4. Abra o arquivo worker/index.js deste projeto, copie TODO (Ctrl+A, Ctrl+C)
-   e cole no editor do Worker (Ctrl+V)
-5. Clique em "Save and Deploy"
-6. Teste: https://manelcamarg.github.io/Gincana-Rainha-de-Copas/admin.html
-   Login: admin@gincana2026.com / Gincana2026!
-
-ALTERNATIVA (deploy automático no futuro):
-- Instale Node.js (https://nodejs.org), rode "npm install -g wrangler",
-  depois "wrangler login" e "wrangler deploy" dentro da pasta do projeto.
-
-
-VERIFICAÇÕES RÁPIDAS:
--------------------
-- Token está no localStorage? → No console digite: localStorage.getItem('admin_token')
-- Deve aparecer: "8efecf79-6838-4175-acc1-72fe25fe6ce5" (ou outro UUID)
-- Se aparecer null, precisa fazer login novamente
-
-
-COMO CONTINUAR COM O DEVIN EM CASA:
-----------------------------------
-1. Clone o repositório: git clone https://github.com/ManelCamarg/Gincana-Rainha-de-Copas.git
-2. Abra o projeto no Devin CLI
-3. Me explique resumidamente: "Estou configurando admin panel Cloudflare. Worker e D1 configurados, mas dados não carregam no painel (erro 401). Token está salvo no localStorage."
-4. Eu vou ler os arquivos e continuar de onde parou
+PRÓXIMOS PASSOS SUGERIDOS (não urgentes):
+-----------------------------------------
+1. 🔐 TROCAR A SENHA admin@gincana2026.com / Gincana2026! por uma segura
+   (criar novo hash e dar UPDATE na tabela users via console D1)
+2. 🧹 Limpar sessões antigas do banco periodicamente (tabela sessions
+   acumula tokens expirados - inofensivo mas pode crescer)
+3. 💾 Instalar Node.js + wrangler para deploy automático do Worker
+   (npm i -g wrangler → wrangler login → wrangler deploy)
+4. 🖼️  Adicionar favicon (aparece 404 no console, só cosmético)
+5. 📢 Avaliar se anúncios devem aparecer no site público (rota já existe,
+   mas o main.js ainda não renderiza essa seção)
 
 
 INFORMAÇÕES TÉCNICAS:
 --------------------
-- Cloudflare Worker ID: 31adbb6a-78f2-4054-8df5-fedd205172e4
-- D1 Database ID: 31adbb6a-78f2-4054-8df5-fedd205172e4
 - Worker URL: https://rainha-de-copas-admin.emanuelcamarg9.workers.dev
-- API Base URL: https://rainha-de-copas-admin.emanuelcamarg9.workers.dev/api
+- API autenticada: /api/{tasks,schedule,team,lore,announcements,score,login,logout}
+- API pública (sem login, só GET): /api/public/{tasks,schedule,team,lore,announcements,score}
 - CORS Origin: https://manelcamarg.github.io
+- Auth: header "Authorization: Bearer <session_id>" (token no localStorage
+  como 'admin_token', sessão em 'admin_session', email em 'admin_email')
+- Score: GET/PUT /api/score {calculated, bonus, total} - bonus fica na
+  tabela settings (key='score_bonus')
 
 
 ARQUITETURA:
 -----------
-GitHub Pages (manelcamarg.github.io)
-  ↓ (faz requests com Authorization: Bearer <token>)
+Site público (manelcamarg.github.io)          Admin (manelcamarg.github.io/admin.html)
+        │                                              │
+        │ GET /api/public/* (sem auth)                 │ GET/PUT/POST/DELETE /api/*
+        │                                              │ Authorization: Bearer <token>
+        ▼                                              ▼
 Cloudflare Worker (rainha-de-copas-admin.workers.dev)
-  ↓ (verifica token no banco D1)
-Cloudflare D1 (banco de dados SQLite)
+        │
+        ▼
+Cloudflare D1 (SQLite): users, sessions, tasks, schedule,
+team_members, lore_story, announcements, settings
 
 
 NOTAS IMPORTANTES:
 -----------------
-- O sistema usa token Bearer, não cookie (devido a cross-origin)
-- O token é salvo no localStorage
-- O Worker precisa estar atualizado com o código mais recente
-- GitHub Pages atualiza automaticamente após push
-- Cloudflare Worker precisa ser atualizado manualmente no Dashboard
+- GitHub Pages atualiza sozinho ~1min após cada push (usar Ctrl+Shift+R
+  no navegador para limpar cache)
+- Worker precisa de atualização MANUAL no dashboard a cada mudança em
+  worker/index.js
+- O site tem fallback para JSON: se a API cair, o site continua no ar
+  com os dados dos arquivos data/*.json
+- Não há Node.js neste computador → deploy do Worker é sempre manual
+  (copiar/colar no dashboard)
 
 
 ERROS COMUNS E SOLUÇÕES:
 -------------------------
 Erro 401 Unauthorized:
-  - Verifique se o Worker está atualizado
-  - Verifique se o token está no localStorage
-  - Verifique se o token está sendo enviado no Authorization header
+  - Sessão expirou (24h) → fazer login novamente no admin
+  - Token ausente → verificar localStorage 'admin_token'
 
-Erro CORS:
-  - Verifique se o Worker tem os headers CORS configurados
-  - Verifique se a origem está configurada corretamente
+Erro CORS / "Failed to fetch" no admin:
+  - Worker com código antigo → atualizar no dashboard
+  - Se persistir, abrir F12 > Console e mandar o erro real
 
-Login funciona mas dados não carregam:
-  - Verifique se o Worker foi atualizado no Cloudflare Dashboard
-  - O código local está atualizado, mas o Worker pode estar com código antigo
+Toast "Erro 500" + "no such column":
+  - Campo enviado que não existe na tabela → o Worker agora filtra
+    colunas automaticamente (filterColumns), mas se acontecer, verificar
+    se o frontend está mandando campo errado
+
+Site mostra dados antigos:
+  - Cache do navegador → Ctrl+Shift+R
+  - Se o admin salvou mas site não mudou → verificar se Worker está
+    atualizado e se a tabela settings existe (para /api/score)
+
+D1 console "No SQL statements detected":
+  - O texto não foi colado na caixa de query → clicar dentro da caixa
+    antes de colar; rodar statements grandes em partes
 
 
 CONTATO SUPORTE:
