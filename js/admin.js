@@ -6,6 +6,14 @@ class AdminPanel {
         this.editingItem = null;
         this.editingType = null;
         this.sessionToken = null;
+        // Maps frontend type names to Worker API endpoints
+        this.typeEndpoints = {
+            task: 'tasks',
+            event: 'schedule',
+            member: 'team',
+            chapter: 'lore',
+            announcement: 'announcements'
+        };
         // Cloudflare Worker URL
         this.apiBaseUrl = 'https://rainha-de-copas-admin.emanuelcamarg9.workers.dev/api';
         
@@ -525,7 +533,7 @@ class AdminPanel {
                     headers['Authorization'] = `Bearer ${this.sessionToken}`;
                 }
                 
-                const response = await fetch(`${this.apiBaseUrl}/${type}/${id}`, {
+                const response = await fetch(`${this.apiBaseUrl}/${this.typeEndpoints[type]}/${id}`, {
                     headers: headers
                 });
                 
@@ -642,9 +650,10 @@ class AdminPanel {
         
         try {
             const method = this.editingItem ? 'PUT' : 'POST';
+            const endpoint = this.typeEndpoints[this.editingType];
             const url = this.editingItem 
-                ? `${this.apiBaseUrl}/${this.editingType}/${this.editingItem}`
-                : `${this.apiBaseUrl}/${this.editingType}`;
+                ? `${this.apiBaseUrl}/${endpoint}/${this.editingItem}`
+                : `${this.apiBaseUrl}/${endpoint}`;
             
             const headers = {
                 'Content-Type': 'application/json'
@@ -684,7 +693,7 @@ class AdminPanel {
                 headers['Authorization'] = `Bearer ${this.sessionToken}`;
             }
             
-            const response = await fetch(`${this.apiBaseUrl}/${type}/${id}`, {
+            const response = await fetch(`${this.apiBaseUrl}/${this.typeEndpoints[type]}/${id}`, {
                 method: 'DELETE',
                 headers: headers
             });
