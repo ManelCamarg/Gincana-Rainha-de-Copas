@@ -50,3 +50,10 @@ INSERT INTO lore_story (chapter, title, title_en, description, description_en, i
 ('Capítulo 3', 'A Orientação do Gato de Cheshire', 'The Cheshire Cat''s Guidance', 'O gato que aparece e desaparece ensinou Alice que no Wonderland, todos são loucos - inclusive ela.', 'The cat that appears and disappears taught Alice that in Wonderland, everyone is mad - including her.', '😺'),
 ('Capítulo 4', 'O Caos do Chá do Chapeleiro Maluco', 'The Mad Hatter''s Tea Party Chaos', 'Um chá interminável onde o tempo parou e a loucura reina suprema com o Chapeleiro e a Lebre de Março.', 'An endless tea party where time stopped and madness reigns supreme with the Hatter and the March Hare.', '🎩'),
 ('Capítulo Final', 'O Jogo de Croquet da Rainha & O Julgamento Absurdo', 'The Queen''s Croquet Game & The Absurd Courtroom Trial', 'A temível Rainha de Copas convida Alice para um jogo de croquet com flamingos e ouriços, culminando em um julgamento onde a sentença é sempre a mesma: ''OFF WITH THEIR HEADS!''', 'The fearsome Queen of Hearts invites Alice to a croquet game with flamingos and hedgehogs, culminating in a trial where the sentence is always the same: ''OFF WITH THEIR HEADS!''', '👑');
+
+-- SETTINGS TABLE (needed for the admin 'Pontuação' tab / manual score bonus)
+CREATE TABLE IF NOT EXISTS settings (
+  key TEXT PRIMARY KEY,
+  value TEXT
+);
+INSERT OR IGNORE INTO settings (key, value) VALUES ('score_bonus', '0');
