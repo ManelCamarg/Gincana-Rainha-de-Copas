@@ -83,7 +83,7 @@ async function verifySession(request, env) {
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.substring(7);
     const result = await env.DB.prepare(
-      'SELECT user_id, email FROM sessions WHERE session_id = ? AND expires_at > datetime("now")'
+      'SELECT user_id FROM sessions WHERE session_id = ? AND expires_at > datetime("now")'
     ).bind(token).first();
     return result;
   }
@@ -100,7 +100,7 @@ async function verifySession(request, env) {
   const sessionId = sessionCookie.split('=')[1];
   
   const result = await env.DB.prepare(
-    'SELECT user_id, email FROM sessions WHERE session_id = ? AND expires_at > datetime("now")'
+    'SELECT user_id FROM sessions WHERE session_id = ? AND expires_at > datetime("now")'
   ).bind(sessionId).first();
   
   return result;
@@ -134,10 +134,11 @@ async function handleLogin(request, env, corsHeaders) {
   // Create session
   const sessionId = crypto.randomUUID();
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+  const expiresAtStr = expiresAt.toISOString().slice(0, 19).replace('T', ' ');
   
   await env.DB.prepare(
     'INSERT INTO sessions (session_id, user_id, expires_at) VALUES (?, ?, ?)'
-  ).bind(sessionId, user.id, expiresAt.toISOString()).run();
+  ).bind(sessionId, user.id, expiresAtStr).run();
   
   // Return session token (for cross-origin auth via localStorage)
   const response = new Response(JSON.stringify({ 
@@ -155,6 +156,13 @@ async function handleLogin(request, env, corsHeaders) {
 }
 
 async function handleLogout(request, env, corsHeaders) {
+  // Delete session via Bearer token (primary auth method)
+  const authHeader = request.headers.get('Authorization');
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.substring(7);
+    await env.DB.prepare('DELETE FROM sessions WHERE session_id = ?').bind(token).run();
+  }
+  
   const cookieHeader = request.headers.get('Cookie');
   if (cookieHeader) {
     const cookies = cookieHeader.split(';').map(c => c.trim());
