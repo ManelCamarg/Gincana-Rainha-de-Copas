@@ -73,9 +73,13 @@ STATUS ATUAL:
   (erro "Not Found") — commit eb672de
 - ⚠️ D1 só tinha 3 linhas de exemplo por tabela; site real tem 8 tasks,
   8 events, 8 members, 5 capítulos → rodar database/import-data.sql no D1
-- ⚠️ IMPORTANTE: o site público (index.html/js/main.js) lê os arquivos
-  data/*.json, NÃO a API. Editar no admin NÃO muda o site público ainda.
-  Decidir depois se o site passa a ler do Worker (precisa rota pública).
+- ✅ Site público agora lê dados AO VIVO do D1 via rotas públicas
+  GET /api/public/{tasks,schedule,team,lore,announcements} (sem login)
+  com fallback automático para data/*.json — commit 38a695d
+- ⚠️ PENDENTE: atualizar o Worker no Cloudflare com o novo worker/index.js
+  (contém as rotas /api/public/) — sem isso o site usa os JSONs (fallback)
+- ℹ️ mascot-materials continua em JSON (não tem tabela no D1)
+- ℹ️ announcements público filtra is_active = 1
 
 
 PROBLEMA ENCONTRADO EM 16/11/2026 (CORRIGIDO NO CÓDIGO):
