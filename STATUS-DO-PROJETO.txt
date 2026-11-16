@@ -67,7 +67,15 @@ STATUS ATUAL:
 - ✅ Cloudflare Worker VERIFICADO: já está com o código novo (login retorna token)
 - ✅ Banco de dados D1 configurado com dados
 - ✅ Login funciona (retorna token)
-- ❌ Rotas autenticadas davam erro 500 (bug corrigido em 16/11/2026)
+- ✅ Rotas autenticadas corrigidas (SELECT email bug) — commit 30d7d55
+- ✅ Editar/excluir corrigido: frontend usava /api/task, /api/event etc
+  mas Worker só conhece tasks, schedule, team, lore, announcements
+  (erro "Not Found") — commit eb672de
+- ⚠️ D1 só tinha 3 linhas de exemplo por tabela; site real tem 8 tasks,
+  8 events, 8 members, 5 capítulos → rodar database/import-data.sql no D1
+- ⚠️ IMPORTANTE: o site público (index.html/js/main.js) lê os arquivos
+  data/*.json, NÃO a API. Editar no admin NÃO muda o site público ainda.
+  Decidir depois se o site passa a ler do Worker (precisa rota pública).
 
 
 PROBLEMA ENCONTRADO EM 16/11/2026 (CORRIGIDO NO CÓDIGO):
