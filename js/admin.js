@@ -383,7 +383,7 @@ class AdminPanel {
             card.innerHTML = `
                 <div class="text-5xl mb-3">${member.icon}</div>
                 <h4 class="font-semibold text-gray-800">${member.name}</h4>
-                <p class="text-[#B8860B] font-medium text-sm">${member.role}</p>
+                <p class="text-[#8B6914] font-medium text-sm">${member.role}</p>
                 <p class="text-gray-600 text-sm mb-3">${member.grade}</p>
                 <div class="flex justify-center space-x-2">
                     <button class="edit-btn px-3 py-1 bg-[#DC143C] hover:bg-[#8B0000] text-white rounded text-sm" data-id="${member.id}">Editar</button>
@@ -441,7 +441,7 @@ class AdminPanel {
             card.innerHTML = `
                 <div class="flex items-start justify-between">
                     <div class="flex-1">
-                        <span class="text-[#B8860B] text-sm font-semibold">${chapter.chapter}</span>
+                        <span class="text-[#8B6914] text-sm font-semibold">${chapter.chapter}</span>
                         <h4 class="font-semibold text-gray-800 mt-1">${chapter.title}</h4>
                         <p class="text-gray-600 text-sm mt-2">${chapter.description}</p>
                     </div>
