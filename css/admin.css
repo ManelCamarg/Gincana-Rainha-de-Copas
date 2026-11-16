@@ -92,7 +92,7 @@ input::placeholder {
     background: linear-gradient(135deg, #10B981, #059669);
 }
 
-.status-in-progress {
+.status-in_progress {
     background: linear-gradient(135deg, #FBBF24, #F59E0B);
     color: #451A03 !important;
 }

@@ -888,7 +888,7 @@ body {
     box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
-.status-in-progress {
+.status-in_progress {
     background: linear-gradient(135deg, #FBBF24, #F59E0B);
     color: #451A03 !important;
     box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
