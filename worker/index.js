@@ -1,6 +1,26 @@
 // Cloudflare Worker - Admin API
 export default {
   async fetch(request, env) {
+    try {
+      return await handleRequest(request, env);
+    } catch (error) {
+      // Return JSON errors WITH CORS headers so the browser can read them
+      const corsHeaders = {
+        'Access-Control-Allow-Origin': 'https://manelcamarg.github.io',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Vary': 'Origin'
+      };
+      console.error('Worker error:', error);
+      return new Response(JSON.stringify({ error: 'Internal error', detail: String(error && error.message || error) }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+  }
+};
+
+async function handleRequest(request, env) {
     const url = new URL(request.url);
     const path = url.pathname;
     
@@ -34,8 +54,7 @@ export default {
     }
     
     return new Response('Not Found', { status: 404 });
-  }
-};
+}
 
 const PUBLIC_TABLES = {
   tasks: 'tasks',
