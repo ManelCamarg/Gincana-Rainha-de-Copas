@@ -93,7 +93,8 @@ input::placeholder {
 }
 
 .status-in-progress {
-    background: linear-gradient(135deg, #F59E0B, #D97706);
+    background: linear-gradient(135deg, #FDE68A, #FCD34D);
+    color: #713F12 !important;
 }
 
 .status-pending {
