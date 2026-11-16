@@ -80,6 +80,11 @@ STATUS ATUAL:
   (contém as rotas /api/public/) — sem isso o site usa os JSONs (fallback)
 - ℹ️ mascot-materials continua em JSON (não tem tabela no D1)
 - ℹ️ announcements público filtra is_active = 1
+- ✅ BUG FINAL RESOLVIDO (16/11): saveChanges enviava is_active=false em
+  TODOS os tipos → "no such column: is_active" (500) pois só a tabela
+  announcements tem essa coluna. Corrigido: is_active só vai p/ announcements
+  + Worker agora tem whitelist de colunas por tabela (filterColumns).
+  commits 293a158 (fix) e b1b1ab8 (error handler global com CORS)
 
 
 PROBLEMA ENCONTRADO EM 16/11/2026 (CORRIGIDO NO CÓDIGO):
