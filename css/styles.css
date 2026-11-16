@@ -889,8 +889,8 @@ body {
 }
 
 .status-in-progress {
-    background: linear-gradient(135deg, #FDE68A, #FCD34D);
-    color: #713F12 !important;
+    background: linear-gradient(135deg, #FBBF24, #F59E0B);
+    color: #451A03 !important;
     box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
 }
 
