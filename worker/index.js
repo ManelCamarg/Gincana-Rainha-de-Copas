@@ -18,6 +18,11 @@ export default {
       return new Response(null, { headers: corsHeaders });
     }
     
+    // Public read-only API (no auth required) - used by the public site
+    if (path.startsWith('/api/public/')) {
+      return handlePublicApi(request, env, path, corsHeaders);
+    }
+    
     // API routes
     if (path.startsWith('/api/')) {
       return handleApi(request, env, path, corsHeaders);
@@ -31,6 +36,43 @@ export default {
     return new Response('Not Found', { status: 404 });
   }
 };
+
+const PUBLIC_TABLES = {
+  tasks: 'tasks',
+  schedule: 'schedule',
+  team: 'team_members',
+  lore: 'lore_story',
+  announcements: 'announcements'
+};
+
+async function handlePublicApi(request, env, path, corsHeaders) {
+  const jsonHeaders = { ...corsHeaders, 'Content-Type': 'application/json' };
+  
+  if (request.method !== 'GET') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: jsonHeaders
+    });
+  }
+  
+  const resource = path.split('/').filter(s => s)[2];
+  const table = PUBLIC_TABLES[resource];
+  
+  if (!table) {
+    return new Response(JSON.stringify({ error: 'Not Found' }), {
+      status: 404,
+      headers: jsonHeaders
+    });
+  }
+  
+  const where = resource === 'announcements' ? 'WHERE is_active = 1' : '';
+  const items = await env.DB.prepare(`SELECT * FROM ${table} ${where} ORDER BY id`).all();
+  
+  return new Response(JSON.stringify(items.results), {
+    status: 200,
+    headers: jsonHeaders
+  });
+}
 
 async function handleApi(request, env, path, corsHeaders) {
   const method = request.method;

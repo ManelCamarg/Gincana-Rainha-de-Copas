@@ -19,6 +19,27 @@ document.addEventListener('DOMContentLoaded', function() {
     initMagneticButtons();
 });
 
+// Cloudflare Worker public API - site reads live data from D1
+const API_BASE = 'https://rainha-de-copas-admin.emanuelcamarg9.workers.dev/api/public';
+
+// Fetch a collection from the API, falling back to the local JSON file
+async function fetchCollection(apiPath, jsonFile, jsonKey) {
+    try {
+        const response = await fetch(`${API_BASE}/${apiPath}`);
+        if (response.ok) {
+            const data = await response.json();
+            if (Array.isArray(data)) return data;
+        }
+    } catch (e) {
+        console.warn(`API unavailable for ${apiPath}, using local JSON fallback`);
+    }
+    
+    const response = await fetch(`data/${jsonFile}`);
+    if (!response.ok) throw new Error(`Failed to load ${jsonFile}`);
+    const data = await response.json();
+    return data[jsonKey];
+}
+
 // Loader
 function initLoader() {
     const loader = document.getElementById('loader');
@@ -222,9 +243,7 @@ async function initMascotCards() {
 // Team Members
 async function initTeamMembers() {
     try {
-        const response = await fetch('data/team-members.json');
-        if (!response.ok) throw new Error('Failed to load team members');
-        const data = await response.json();
+        const data = { members: await fetchCollection('team', 'team-members.json', 'members') };
         const container = document.getElementById('team-members');
         
         if (!container) {
@@ -344,9 +363,7 @@ function openTeamModal(member) {
 // Lore Timeline
 async function initLoreTimeline() {
     try {
-        const response = await fetch('data/lore-story.json');
-        if (!response.ok) throw new Error('Failed to load lore story');
-        const data = await response.json();
+        const data = { story: await fetchCollection('lore', 'lore-story.json', 'story') };
         const container = document.getElementById('lore-timeline');
         
         if (!container) {
@@ -422,15 +439,9 @@ async function initLoreTimeline() {
 // Dashboard
 async function initDashboard() {
     try {
-        // Load tasks
-        const tasksResponse = await fetch('data/tasks.json');
-        if (!tasksResponse.ok) throw new Error('Failed to load tasks');
-        const tasksData = await tasksResponse.json();
-        
-        // Load schedule
-        const scheduleResponse = await fetch('data/schedule.json');
-        if (!scheduleResponse.ok) throw new Error('Failed to load schedule');
-        const scheduleData = await scheduleResponse.json();
+        // Load tasks and schedule (API first, JSON fallback)
+        const tasksData = { tasks: await fetchCollection('tasks', 'tasks.json', 'tasks') };
+        const scheduleData = { events: await fetchCollection('schedule', 'schedule.json', 'events') };
         
         // Calculate stats
         const completedTasks = tasksData.tasks.filter(task => task.status === 'completed');
@@ -438,7 +449,7 @@ async function initDashboard() {
         const pendingTasks = tasksData.tasks.filter(task => task.status === 'pending');
         const totalScore = completedTasks.reduce((sum, task) => sum + task.points, 0);
         const maxScore = tasksData.tasks.reduce((sum, task) => sum + task.points, 0);
-        const progressPercentage = Math.round((completedTasks.length / tasksData.tasks.length) * 100);
+        const progressPercentage = Math.round((completedTasks.length / (tasksData.tasks.length || 1)) * 100);
         
         // Update stats
         const totalScoreElement = document.getElementById('total-score');
