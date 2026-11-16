@@ -265,6 +265,23 @@ async function handleAnnouncements(request, env, id, method, corsHeaders) {
   return handleResource(request, env, id, method, corsHeaders, 'announcements');
 }
 
+const TABLE_COLUMNS = {
+  tasks: ['name', 'name_en', 'description', 'description_en', 'status', 'points', 'deadline'],
+  schedule: ['name', 'name_en', 'date', 'time', 'location', 'type'],
+  team_members: ['name', 'role', 'role_en', 'grade', 'icon', 'quote'],
+  lore_story: ['chapter', 'title', 'title_en', 'description', 'description_en', 'icon'],
+  announcements: ['title', 'content', 'is_active']
+};
+
+function filterColumns(table, data) {
+  const allowed = TABLE_COLUMNS[table] || [];
+  const clean = {};
+  for (const key of Object.keys(data)) {
+    if (allowed.includes(key)) clean[key] = data[key];
+  }
+  return clean;
+}
+
 async function handleResource(request, env, id, method, corsHeaders, table) {
   switch (method) {
     case 'GET':
@@ -281,7 +298,13 @@ async function handleResource(request, env, id, method, corsHeaders, table) {
       }
       
     case 'POST':
-      const data = await request.json();
+      const data = filterColumns(table, await request.json());
+      if (Object.keys(data).length === 0) {
+        return new Response(JSON.stringify({ error: 'No valid fields' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
       const result = await env.DB.prepare(
         `INSERT INTO ${table} (${Object.keys(data).join(', ')}) VALUES (${Object.keys(data).map(() => '?').join(', ')})`
       ).bind(...Object.values(data)).run();
@@ -292,7 +315,13 @@ async function handleResource(request, env, id, method, corsHeaders, table) {
       });
       
     case 'PUT':
-      const updateData = await request.json();
+      const updateData = filterColumns(table, await request.json());
+      if (Object.keys(updateData).length === 0) {
+        return new Response(JSON.stringify({ error: 'No valid fields' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
       const updateResult = await env.DB.prepare(
         `UPDATE ${table} SET ${Object.keys(updateData).map(k => k + ' = ?').join(', ')} WHERE id = ?`
       ).bind(...Object.values(updateData), id).run();

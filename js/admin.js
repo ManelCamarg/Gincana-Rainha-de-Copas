@@ -641,11 +641,15 @@ class AdminPanel {
             data[key] = value;
         });
         
-        // Handle checkbox
-        if (data.is_active === 'on') {
-            data.is_active = true;
-        } else if (data.is_active === undefined) {
-            data.is_active = false;
+        // Handle checkbox - only announcements have the is_active column
+        if (this.editingType === 'announcement') {
+            if (data.is_active === 'on') {
+                data.is_active = true;
+            } else if (data.is_active === undefined) {
+                data.is_active = false;
+            }
+        } else {
+            delete data.is_active;
         }
         
         try {
@@ -674,7 +678,7 @@ class AdminPanel {
                 this.switchTab(this.currentTab);
             } else {
                 const errorData = await this.parseError(response);
-                this.showToast('error', `Erro ${response.status}`, errorData.error || errorData.message || 'Falha ao salvar');
+                this.showToast('error', `Erro ${response.status}`, errorData.detail || errorData.error || errorData.message || 'Falha ao salvar');
             }
         } catch (error) {
             console.error('Error saving changes:', error);
@@ -716,7 +720,7 @@ class AdminPanel {
                 this.switchTab(this.currentTab);
             } else {
                 const errorData = await this.parseError(response);
-                this.showToast('error', `Erro ${response.status}`, errorData.error || errorData.message || 'Falha ao excluir');
+                this.showToast('error', `Erro ${response.status}`, errorData.detail || errorData.error || errorData.message || 'Falha ao excluir');
             }
         } catch (error) {
             console.error('Error deleting item:', error);
